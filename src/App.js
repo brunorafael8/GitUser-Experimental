@@ -1,5 +1,22 @@
-import React from "react";
+import React, { Suspense, useState, useTransition } from "react";
+import graphql from "babel-plugin-relay/macro";
+import {
+  preloadQuery,
+  RelayEnvironmentProvider,
+  usePreloadedQuery
+} from "react-relay/hooks";
 import styled from "styled-components";
+import RelayEnvironment from "./RelayEnvironment";
+
+const UserNameQuery = graphql`
+  query AppQuery($login: String!) {
+    user(login: $login) {
+      name
+      login
+      bio
+    }
+  }
+`;
 
 const Container = styled.div`
   background-color: #e90052;
@@ -49,15 +66,73 @@ const SearchButton = styled.button`
   color: #fff;
 `;
 
-const App = () => {
+const UserWrapper = styled.section`
+  margin-top: 20px;
+  min-width: 200px;
+  min-height: 200px;
+`;
+
+const UserContent = styled.div`
+  background-color: white;
+`;
+
+const User = props => {
+  const data = usePreloadedQuery(
+    UserNameQuery,
+    preloadQuery(RelayEnvironment, UserNameQuery, {
+      login: props.user
+    })
+  );
+
+  const { name, login, bio } = data.user;
+
   return (
-    <Container>
-      <Content>
-        <Title>GITUSER</Title>
-        <SearchInput placeholder="Ex: brunorafael8" />
-        <SearchButton>Search</SearchButton>
-      </Content>
-    </Container>
+    <UserContent>
+      <label>{name}</label>
+      <br />
+      <label>{login}</label>
+      <br />
+      <p>{bio}</p>
+      <br />
+    </UserContent>
+  );
+};
+
+const App = () => {
+  const [user, setUser] = useState("");
+  const [userSearched, setUserSearched] = useState("");
+  const [startTransition, isPending] = useTransition({
+    timeoutMs: 3000
+  });
+  console.log(isPending);
+  return (
+    <RelayEnvironmentProvider environment={RelayEnvironment}>
+      <Container>
+        <Content>
+          <Title>GITUSER</Title>
+          <SearchInput
+            onChange={e => setUser(e.target.value)}
+            placeholder="Ex: brunorafael8"
+          />
+          <SearchButton
+            onClick={() => {
+              startTransition(() => {
+                setUserSearched(user);
+              });
+            }}
+          >
+            {isPending ? "Searching..." : "Search"}
+          </SearchButton>
+          <UserWrapper>
+            {userSearched && (
+              <Suspense fallback={`Searching ${userSearched}...`}>
+                <User user={userSearched} />
+              </Suspense>
+            )}
+          </UserWrapper>
+        </Content>
+      </Container>
+    </RelayEnvironmentProvider>
   );
 };
 
