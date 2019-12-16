@@ -6,13 +6,16 @@
     "react": "^0.0.0-experimental-b53ea6ca0",
     "react-dom": "^0.0.0-experimental-b53ea6ca0",
     "react-scripts": "3.2.0",
+    "react-relay": "^0.0.0-experimental-a1a40b68", 
+    "relay-runtime": "7.0.0",
     "styled-components": "^4.4.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "relay": "yarn run relay-compiler --schema schema.graphql --src ./src/ --watchman false $@"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -28,5 +31,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "babel-plugin-relay": "^7.1.0",
+    "graphql": "^14.5.8",
+    "relay-compiler": "^7.1.0"
   }
 }
